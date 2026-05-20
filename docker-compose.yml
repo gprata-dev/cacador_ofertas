@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cacador_ofertas
+    volumes:
+      - mysql_data:/var/lib/mysql 
+
+  bot:
+    build: .
+    restart: always
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:
