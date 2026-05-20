@@ -1,7 +1,7 @@
 <?php
 
 class RedditScraper {
-    private $url = "https://www.reddit.com/r/FreeGameFindings/new.json?limit=5";
+    private $url = "https://www.reddit.com/r/FreeGameFindings/new.rss?limit=5";
 
     /**
      * @return array
@@ -16,15 +16,13 @@ class RedditScraper {
         curl_setopt($ch, CURLOPT_USERAGENT, "php:cacadordeofertas:v1.0 (by /u/Fit-Cardiologist-124)");
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        if ($httpCode !== 200) {
+        if ($httpCode !== 200 || empty($response)) {
             echo "\n[BLOQUEIO REDDIT] Código HTTP: {$httpCode}\n";
-            return [];
-        }
-        if (empty($response)) {
             return [];
         }
 
@@ -32,36 +30,52 @@ class RedditScraper {
     }
 
     /**
-     * @param string $jsonResponse
+     * @param string $xmlResponse
      * @return array
      * 
      * Extracts game data from json
      */
-    private function extractData(string $jsonResponse): array
+    private function extractData(string $xmlResponse): array
     {
-        $data    = json_decode($jsonResponse, true);
         $results = [];
 
-        if (isset($data['data']['children'])) {
-            foreach ($data['data']['children'] as $post) {
-                $postData = $post['data'];
-                
-                $postId = $postData['id'];
-                $title  = $postData['title'];
-                $url    = $postData['url'];
+        libxml_use_internal_errors(true);
+        $xml = simplexml_load_string($xmlResponse);
 
-                if(stripos($title, 'Exiled') !== false || str_contains($url, 'givee.club') || str_contains($url, 'gleam.io')) {
+        if ($xml === false) {
+            echo "\n[AVISO] A resposta do Reddit não é um XML válido. Ignorando...\n";
+            libxml_clear_errors(); 
+            return [];
+        }
+
+        if (isset($xml->entry)) {        
+            foreach ($xml->entry as $entry) {
+
+                $postId = (string)$entry->id;
+                $title  = (string)$entry->title;
+                $url    = (string)$entry->link['href'];
+
+                $contentHtml = html_entity_decode((string)$entry->content);
+                if (preg_match('/<span><a href="([^"]+)">\[link\]<\/a><\/span>/', $contentHtml, $matches)) {
+                    $url = $matches[1];
+                }
+
+                if(stripos($title, 'Exiled Giveaways') !== false || str_contains($url, 'givee.club') || str_contains($url, 'gleam.io')) {
                     continue;
                 }
 
+                $cleanId = explode('t3_', $postId);
+                $finalId = isset($cleanId[1]) ? $cleanId[1] : md5($title);
+
                 $results[] = [
-                    'app_id' => $postId,
+                    'app_id' => $finalId,
                     'title'  => $title,
                     'link'   => $url
                 ];
             }
         }
-
+    
+        libxml_clear_errors();
         return $results;
     }
 }
