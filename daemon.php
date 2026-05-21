@@ -29,11 +29,18 @@ $query = "INSERT INTO free_games (app_id, title, link)
 $stmt  = $db->prepare($query);
 
 while (true) {
+    $actualTime = (int)date('G');
+    if ($actualTime >= 0 && $actualTime <= 7) {
+        echo "[" . date('H:i:s') . "] Dentro do horário de silêncio (0h às 7h). Daemon em espera...\n";
+        sleep(600);
+        continue;
+    }
+
     echo "[" . date('H:i:s') . "] Varrendo a Steam...\n";
     $steamGames = $steamScraper->searchFreeGames();
 
     if(empty($steamGames)) {
-        echo "Nenhum jogo gratuito encontrado!\n";
+        echo "Nenhum jogo gratuito encontrado na Steam\n";
     } else {
         foreach ($steamGames as $game) {
             try {
@@ -69,7 +76,7 @@ while (true) {
     $redditGames = $redditScraper->searchFreeGames();
 
     if(empty($redditGames)) {
-        echo "[FALHA] Nenhum jogo gratuito encontrado!\n";
+        echo "[FALHA] Nenhum jogo gratuito encontrado no Reddit\n";
         $errorTelReturn = $telegram->sendMessage("🚨 [FALHA] Nenhum jogo gratuito encontrado no Reddit");
     } else {
         foreach ($redditGames as $game) {
