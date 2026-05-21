@@ -60,7 +60,7 @@ class RedditScraper {
                     $url = $matches[1];
                 }
 
-                if(stripos($title, 'Exiled Giveaways') !== false || str_contains($url, 'givee.club') || str_contains($url, 'gleam.io')) {
+                if(stripos($title, 'Exiled Giveaways') !== false || stripos($title, 'FGF Giveaway') !== false || str_contains($url, 'givee.club') || str_contains($url, 'gleam.io')) {
                     continue;
                 }
 
