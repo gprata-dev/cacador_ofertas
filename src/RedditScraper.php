@@ -50,14 +50,20 @@ class RedditScraper {
 
         if (isset($xml->entry)) {        
             foreach ($xml->entry as $entry) {
+                $limit24h             = time() - (60 * 60 * 24);
+                $publicationTimestamp = strtotime((string)$entry->published);
+                if ($limit24h > $publicationTimestamp) {
+                    continue;
+                }
 
                 $postId = (string)$entry->id;
                 $title  = (string)$entry->title;
-                $url    = (string)$entry->link['href'];
 
                 $contentHtml = html_entity_decode((string)$entry->content);
                 if (preg_match('/<span><a href="([^"]+)">\[link\]<\/a><\/span>/', $contentHtml, $matches)) {
                     $url = $matches[1];
+                } else {
+                    $url = (string)$entry->link['href'];
                 }
 
                 if(stripos($title, 'Exiled Giveaways') !== false || stripos($title, 'FGF Giveaway') !== false || str_contains($url, 'givee.club') || str_contains($url, 'gleam.io')) {
