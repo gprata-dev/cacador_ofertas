@@ -19,7 +19,7 @@ class TelegramBot
      */
     public function sendMessage(string $message): array
     {
-        $url = "https://api.telegram.org/bot{$this->token}/sendMessage";
+        $url  = "https://api.telegram.org/bot{$this->token}/sendMessage";
         $data = [
             'chat_id'                  => $this->chatId,
             'text'                     => $message,
@@ -32,10 +32,8 @@ class TelegramBot
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         
-        $result = curl_exec($ch);
+        $result   = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if ($result === false) {
