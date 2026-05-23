@@ -29,18 +29,18 @@ $query = "INSERT INTO free_games (app_id, title, link)
 $stmt  = $db->prepare($query);
 
 while (true) {
-    $actualTime = (int)date('G');
-    if ($actualTime >= 0 && $actualTime <= 7) {
-        echo "[" . date('H:i:s') . "] Dentro do horário de silêncio (0h às 7h). Daemon em espera...\n";
-        sleep(600);
-        continue;
-    }
-
     try {
         $db->query("SELECT 1");
     } catch (\PDOException $e) {
         echo "[" . date('H:i:s') . "] Conexão com o banco perdida. Reconectando...\n";
         $db = (new Database($dbConfig))->getConnection();
+    }
+    
+    $actualTime = (int)date('G');
+    if ($actualTime >= 0 && $actualTime <= 7) {
+        echo "[" . date('H:i:s') . "] Dentro do horário de silêncio (0h às 7h). Daemon em espera...\n";
+        sleep(600);
+        continue;
     }
 
     echo "[" . date('H:i:s') . "] Varrendo a Steam...\n";
