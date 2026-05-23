@@ -14,8 +14,6 @@ class RedditScraper {
         curl_setopt($ch, CURLOPT_URL, $this->url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, "php:cacadordeofertas:v1.0 (by /u/Fit-Cardiologist-124)");
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
         $response = curl_exec($ch);
@@ -33,7 +31,7 @@ class RedditScraper {
      * @param string $xmlResponse
      * @return array
      * 
-     * Extracts game data from json
+     * Extracts game data from xml
      */
     private function extractData(string $xmlResponse): array
     {
@@ -61,9 +59,9 @@ class RedditScraper {
 
                 $contentHtml = html_entity_decode((string)$entry->content);
                 if (preg_match('/<span><a href="([^"]+)">\[link\]<\/a><\/span>/', $contentHtml, $matches)) {
-                    $url = $matches[1];
+                    $url     = $matches[1];
                 } else {
-                    $url = (string)$entry->link['href'];
+                    $url     = (string)$entry->link['href'];
                 }
 
                 if(stripos($title, 'Exiled Giveaways') !== false || stripos($title, 'FGF Giveaway') !== false || str_contains($url, 'givee.club') || str_contains($url, 'gleam.io')) {

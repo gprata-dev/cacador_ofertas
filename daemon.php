@@ -84,7 +84,6 @@ while (true) {
 
     if(empty($redditGames)) {
         echo "[FALHA] Nenhum jogo gratuito encontrado no Reddit\n";
-        $errorTelReturn = $telegram->sendMessage("🚨 [FALHA] Nenhum jogo gratuito encontrado no Reddit");
     } else {
         foreach ($redditGames as $game) {
             try {
