@@ -20,8 +20,7 @@ class RedditScraper {
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if ($httpCode !== 200 || empty($response)) {
-            echo "\n[BLOQUEIO REDDIT] Código HTTP: {$httpCode}\n";
-            return [];
+            throw new Exception("Erro HTTP {$httpCode} ou resposta vazia no Reddit");
         }
 
         return $this->extractData($response);
