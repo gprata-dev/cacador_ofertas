@@ -23,6 +23,10 @@ if ($inicialTelReturn['status'] === 'error') {
     exit;
 }
 
+$steamFails  = 0;
+$redditFails = 0;
+$failsLimit  = 5;
+
 $query = "INSERT INTO free_games (app_id, title, link)
             VALUES (:app_id, :title, :link) 
             ON DUPLICATE KEY UPDATE id=id";
@@ -43,71 +47,104 @@ while (true) {
         continue;
     }
 
+
     echo "[" . date('H:i:s') . "] Varrendo a Steam...\n";
-    $steamGames = $steamScraper->searchFreeGames();
+    try {
+        $steamGames = $steamScraper->searchFreeGames();
+        $steamFails = 0;
 
-    if(!empty($steamGames)) {
-        foreach ($steamGames as $game) {
-            try {
-                $stmt->bindValue(':app_id', $game['app_id'], PDO::PARAM_STR);
-                $stmt->bindValue(':title', $game['title'], PDO::PARAM_STR);
-                $stmt->bindValue(':link', $game['link'], PDO::PARAM_STR);
-                $stmt->execute();
+        if(!empty($steamGames)) {
+            foreach ($steamGames as $game) {
+                try {
+                    $stmt->bindValue(':app_id', $game['app_id'], PDO::PARAM_STR);
+                    $stmt->bindValue(':title', $game['title'], PDO::PARAM_STR);
+                    $stmt->bindValue(':link', $game['link'], PDO::PARAM_STR);
+                    $stmt->execute();
 
-                if ($stmt->rowCount() > 0) {
-                    echo "🚨 STEAM: {$game['title']}!\n";
-                    $telText   = "🚨 <b>NOVO JOGO GRÁTIS NA STEAM!</b>\n\n";
-                    $telText  .= "🎮 <b>{$game['title']}</b>\n";
-                    $telText  .= "👉<a href='{$game['link']}'>{$game['link']}</a>";
+                    if ($stmt->rowCount() > 0) {
+                        echo "🚨 STEAM: {$game['title']}!\n";
+                        $telText   = "🚨 <b>NOVO JOGO GRÁTIS NA STEAM!</b>\n\n";
+                        $telText  .= "🎮 <b>{$game['title']}</b>\n";
+                        $telText  .= "👉<a href='{$game['link']}'>{$game['link']}</a>";
 
-                    $telReturn = $telegram->sendMessage($telText);
-                    if ($telReturn['status'] === 'error') {
-                        echo "[FALHA TELEGRAM] " . $telReturn['message'] . "\n";
+                        $telReturn = $telegram->sendMessage($telText);
+                        if ($telReturn['status'] === 'error') {
+                            echo "[FALHA TELEGRAM] " . $telReturn['message'] . "\n";
+                        }
+                    }
+                } catch (\PDOException $e) {
+                    $dbError  = "[ERRO BANCO] " . $e->getMessage() . "\n";
+                    echo $dbError;                
+                    $errorTelReturn = $telegram->sendMessage($dbError);
+                    if ($errorTelReturn['status'] === 'error') {
+                        echo "[FALHA TELEGRAM] " . $errorTelReturn['message'] . "\n";
                     }
                 }
-            } catch (\PDOException $e) {
-                $dbError  = "[ERRO BANCO] " . $e->getMessage() . "\n";
-                echo $dbError;                
-                $errorTelReturn = $telegram->sendMessage($dbError);
-                if ($errorTelReturn['status'] === 'error') {
-                    echo "[FALHA TELEGRAM] " . $errorTelReturn['message'] . "\n";
-                }
             }
+        }
+    } catch (Exception $e) {
+        $steamFails++;
+        $steamError = "[FALHA STEAM] {$steamFails}/{$failsLimit}: " . $e->getMessage() . "\n";
+        echo $steamError;
+
+        if($steamFails >= $failsLimit) {
+            $errorTelReturn = $telegram->sendMessage($steamError);
+            if ($errorTelReturn['status'] === 'error') {
+                echo "[FALHA TELEGRAM] " . $errorTelReturn['message'] . "\n";
+            }
+            
+            $steamFails = 0;
         }
     }
 
     
     echo "[" . date('H:i:s') . "] Varrendo o r/FreeGameFindings...\n";
-    $redditGames = $redditScraper->searchFreeGames();
+    try {
+        $redditGames = $redditScraper->searchFreeGames();
+        $redditFails = 0;
 
-    if(!empty($redditGames)) {
-        foreach ($redditGames as $game) {
-            try {
-                $stmt->bindValue(':app_id', $game['app_id'], PDO::PARAM_STR);
-                $stmt->bindValue(':title', $game['title'], PDO::PARAM_STR);
-                $stmt->bindValue(':link', $game['link'], PDO::PARAM_STR);
-                $stmt->execute();
+        if(!empty($redditGames)) {
+            foreach ($redditGames as $game) {
+                try {
+                    $stmt->bindValue(':app_id', $game['app_id'], PDO::PARAM_STR);
+                    $stmt->bindValue(':title', $game['title'], PDO::PARAM_STR);
+                    $stmt->bindValue(':link', $game['link'], PDO::PARAM_STR);
+                    $stmt->execute();
 
-                if ($stmt->rowCount() > 0) {
-                    echo "🚨 REDDIT: {$game['title']}!\n";
-                    $telText   = "🚨 <b>NOVO POST NO REDDIT!</b>\n\n";
-                    $telText  .= "🎮 <b>{$game['title']}</b>\n";
-                    $telText  .= "👉<a href='{$game['link']}'>{$game['link']}</a>\n\n";
-                    $telText  .= "<a href='https://www.reddit.com/r/FreeGameFindings/comments/{$game['app_id']}/'>https://www.reddit.com/r/FreeGameFindings/comments/{$game['app_id']}/</a>";
+                    if ($stmt->rowCount() > 0) {
+                        echo "🚨 REDDIT: {$game['title']}!\n";
+                        $telText   = "🚨 <b>NOVO POST NO REDDIT!</b>\n\n";
+                        $telText  .= "🎮 <b>{$game['title']}</b>\n";
+                        $telText  .= "👉<a href='{$game['link']}'>{$game['link']}</a>\n\n";
+                        $telText  .= "<a href='https://www.reddit.com/r/FreeGameFindings/comments/{$game['app_id']}/'>https://www.reddit.com/r/FreeGameFindings/comments/{$game['app_id']}/</a>";
 
-                    $telReturn = $telegram->sendMessage($telText);
-                    if ($telReturn['status'] === 'error') {
-                        echo "[FALHA TELEGRAM] " . $telReturn['message'] . "\n";
+                        $telReturn = $telegram->sendMessage($telText);
+                        if ($telReturn['status'] === 'error') {
+                            echo "[FALHA TELEGRAM] " . $telReturn['message'] . "\n";
+                        }
+                    }
+                } catch (\PDOException $e) {
+                    $dbError  = "[ERRO BANCO] " . $e->getMessage() . "\n";
+                    echo $dbError;                
+                    $errorTelReturn = $telegram->sendMessage($dbError);
+                    if ($errorTelReturn['status'] === 'error') {
+                        echo "[FALHA TELEGRAM] " . $errorTelReturn['message'] . "\n";
                     }
                 }
-            } catch (\PDOException $e) {
-                $dbError  = "[ERRO BANCO] " . $e->getMessage() . "\n";
-                echo $dbError;                
-                $errorTelReturn = $telegram->sendMessage($dbError);
-                if ($errorTelReturn['status'] === 'error') {
-                    echo "[FALHA TELEGRAM] " . $errorTelReturn['message'] . "\n";
-                }
             }
+        }
+    } catch (Exception $e) {
+        $redditFails++;
+        $redditError = "[FALHA REDDIT] {$redditFails}/{$failsLimit}: " . $e->getMessage() . "\n";
+        echo $redditError;
+
+        if($redditFails >= $failsLimit) {
+            $errorTelReturn = $telegram->sendMessage($redditError);
+            if ($errorTelReturn['status'] === 'error') {
+                echo "[FALHA TELEGRAM] " . $errorTelReturn['message'] . "\n";
+            }
+
+            $redditFails = 0;
         }
     }
 

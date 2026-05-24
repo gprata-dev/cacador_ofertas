@@ -18,12 +18,8 @@ class SteamScraper {
         $html     = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        if ($httpCode !== 200) {
-            echo "\n[BLOQUEIO] A Steam recusou a conexão! Código HTTP: {$httpCode}\n";
-            return [];
-        }
-        if (empty($html)) {
-            return [];
+        if ($httpCode !== 200 || empty($html)) {
+            throw new Exception("Erro HTTP {$httpCode} ou resposta vazia na Steam");
         }
 
         return $this->extractData($html);
