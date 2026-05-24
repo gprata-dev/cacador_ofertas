@@ -37,7 +37,7 @@ while (true) {
     }
     
     $actualTime = (int)date('G');
-    if ($actualTime >= 0 && $actualTime <= 7) {
+    if ($actualTime >= 0 && $actualTime < 7) {
         echo "[" . date('H:i:s') . "] Dentro do horário de silêncio (0h às 7h). Daemon em espera...\n";
         sleep(600);
         continue;
@@ -46,9 +46,7 @@ while (true) {
     echo "[" . date('H:i:s') . "] Varrendo a Steam...\n";
     $steamGames = $steamScraper->searchFreeGames();
 
-    if(empty($steamGames)) {
-        echo "Nenhum jogo gratuito encontrado na Steam\n";
-    } else {
+    if(!empty($steamGames)) {
         foreach ($steamGames as $game) {
             try {
                 $stmt->bindValue(':app_id', $game['app_id'], PDO::PARAM_STR);
@@ -82,9 +80,7 @@ while (true) {
     echo "[" . date('H:i:s') . "] Varrendo o r/FreeGameFindings...\n";
     $redditGames = $redditScraper->searchFreeGames();
 
-    if(empty($redditGames)) {
-        echo "[FALHA] Nenhum jogo gratuito encontrado no Reddit\n";
-    } else {
+    if(!empty($redditGames)) {
         foreach ($redditGames as $game) {
             try {
                 $stmt->bindValue(':app_id', $game['app_id'], PDO::PARAM_STR);
