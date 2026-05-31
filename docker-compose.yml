@@ -16,5 +16,14 @@ services:
     depends_on:
       - db
 
+  selenium:
+    image: selenium/standalone-chrome:latest
+    container_name: bot_chrome
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 500M
+
 volumes:
   mysql_data:
