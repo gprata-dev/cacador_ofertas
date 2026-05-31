@@ -4,9 +4,10 @@ class SteamScraper {
     private $url = "https://store.steampowered.com/search/?maxprice=free&specials=1&ndl=1";
 
     /**
-     * @return array
-     * 
      * Sets cURL options and returns an array of free Steam games
+     * 
+     * @return array     Array of free Steam games
+     * @throws Exception If HTTP code is not 200 or response is empty
      */
     public function searchFreeGames(): array
     {
@@ -27,10 +28,10 @@ class SteamScraper {
 
     
     /**
-     * @param string $html
-     * @return array
-     * 
      * Extracts game data from HTML
+     * 
+     * @param string $html Steam search page HTML
+     * @return array       Array of free Steam games
      */
     private function extractData(string $html): array
     {

@@ -3,7 +3,7 @@
 class Database {
     private PDO $pdo;
 
-    public function __construct($config)
+    public function __construct(array $config)
     {
         try {
             $dsn = "mysql:host={$config['host']};dbname={$config['db']};charset=utf8mb4";

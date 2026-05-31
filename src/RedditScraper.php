@@ -4,9 +4,10 @@ class RedditScraper {
     private $url = "https://www.reddit.com/r/FreeGameFindings/new.rss?limit=5";
 
     /**
-     * @return array
-     * 
      * Sets cURL options and returns an array of free r/FreeGameFindings games
+     * 
+     * @return array     Array of r/FreeGameFindings posts
+     * @throws Exception If HTTP code is not 200 or response is empty
      */
     public function searchFreeGames(): array
     {
@@ -27,10 +28,10 @@ class RedditScraper {
     }
 
     /**
-     * @param string $xmlResponse
-     * @return array
-     * 
      * Extracts game data from xml
+     * 
+     * @param string $xmlResponse r/FreeGameFindings XML response
+     * @return array              Array of r/FreeGameFindings posts
      */
     private function extractData(string $xmlResponse): array
     {
