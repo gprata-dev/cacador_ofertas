@@ -64,7 +64,7 @@ class RedditScraper {
                     $url     = (string)$entry->link['href'];
                 }
 
-                $regexTitle = '/(Exiled Giveaways|FGF Giveaway)/i';
+                $regexTitle = '/(Exiled Giveaways|FGF Giveaway|FGF Mod Post)/i';
                 $regexUrl   = '/(givee\.club|gleam\.io|alienwarearena)/i';
                 if (preg_match($regexTitle, $title) || preg_match($regexUrl, $url)) {
                     continue;
