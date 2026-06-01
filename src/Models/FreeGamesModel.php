@@ -25,6 +25,14 @@ class FreeGamesModel
      */
     public function insertNewGame(string $appId, string $title, string $link): array
     {
+        $resCheck = $this->checkForRecentlyAddedGames($link);
+        if ($resCheck['status'] === 'error') {
+            return $resCheck;
+        }
+        if ($resCheck['return'] === true) {
+            return ['status' => 'success', 'return' => 0];
+        }
+
         $query = "INSERT INTO {$this->table} (app_id, title, link)
                     VALUES (:app_id, :title, :link) 
                     ON DUPLICATE KEY UPDATE id=id";
@@ -38,6 +46,25 @@ class FreeGamesModel
             return ['status' => 'success', 'return' => $stmt->rowCount()];
         } catch (PDOException $e) {
             return ['status' => 'error', 'return' => 'insertNewGame ' . $e->getMessage()];
+        }
+    }
+
+    private function checkForRecentlyAddedGames(string $link): array
+    {
+        $checkQuery = "SELECT id FROM {$this->table} 
+                        WHERE link = :link 
+                        AND created_at >= NOW() - INTERVAL 1 DAY 
+                        LIMIT 1";
+        try {
+            $checkStmt = $this->db->prepare($checkQuery);
+            $checkStmt->bindValue(':link', $link, PDO::PARAM_STR);
+            $checkStmt->execute();
+
+            $exists = (bool) $checkStmt->fetch();
+
+            return ['status' => 'success', 'return' => $exists];
+        } catch (PDOException $e) {
+            return ['status' => 'error', 'return' => 'checkRecentlyAddedGames ' . $e->getMessage()];
         }
     }
 }
