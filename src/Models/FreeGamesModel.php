@@ -60,9 +60,18 @@ class FreeGamesModel
             $checkStmt->bindValue(':link', $link, PDO::PARAM_STR);
             $checkStmt->execute();
 
-            $exists = (bool) $checkStmt->fetch();
+            if($checkStmt->fetch()) {
+                $updateQuery = "UPDATE {$this->table} 
+                                SET created_at = NOW() 
+                                WHERE link = :link";
+                $updateStmt = $this->db->prepare($updateQuery);
+                $updateStmt->bindValue(':link', $link, PDO::PARAM_STR);
+                $updateStmt->execute();
 
-            return ['status' => 'success', 'return' => $exists];
+                return ['status' => 'success', 'return' => true];
+            }
+
+            return ['status' => 'success', 'return' => false];
         } catch (PDOException $e) {
             return ['status' => 'error', 'return' => 'checkRecentlyAddedGames ' . $e->getMessage()];
         }
