@@ -35,7 +35,7 @@ class FreeGamesModel
 
         $query = "INSERT INTO {$this->table} (app_id, title, link)
                     VALUES (:app_id, :title, :link) 
-                    ON DUPLICATE KEY UPDATE id=id";
+                    ON DUPLICATE KEY UPDATE created_at = NOW()";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':app_id', $appId, PDO::PARAM_STR);
