@@ -65,7 +65,7 @@ class RedditScraper {
                 }
 
                 $regexTitle = '/(Exiled Giveaways|FGF Giveaway|FGF Mod Post)/i';
-                $regexUrl   = '/(givee\.club|gleam\.io|alienwarearena)/i';
+                $regexUrl   = '/(givee\.club|gleam\.io|alienwarearena|mmobomb)/i';
                 if (preg_match($regexTitle, $title) || preg_match($regexUrl, $url)) {
                     continue;
                 }
