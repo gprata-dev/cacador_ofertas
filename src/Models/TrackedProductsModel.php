@@ -8,7 +8,7 @@ use PDOException;
 class TrackedProductsModel
 {
     private string $table = 'tracked_products';
-    private PDO $db;
+    private PDO    $db;
 
     public function __construct(PDO $db)
     {
@@ -20,7 +20,7 @@ class TrackedProductsModel
      * 
      * @param float $newPrice       New target price
      * @param int   $underEditingId Product ID
-     * @return array                Array with status and return
+     * @return array                Associative array ['status' => 'success'|'error', 'return' => int|string].
      */
     public function updateProduct(float $newPrice, int $underEditingId): array
     {
@@ -44,7 +44,7 @@ class TrackedProductsModel
      * 
      * @param string $url         Product URL
      * @param float  $targetPrice Target price
-     * @return array              Array with status and return
+     * @return array              Associative array ['status' => 'success'|'error', 'return' => int|string].
      */
     public function insertProduct(string $url, float $targetPrice): array
     {
@@ -66,7 +66,7 @@ class TrackedProductsModel
     /**
      * Get all tracked products
      * 
-     * @return array Array with status and return
+     * @return array Associative array ['status' => 'success'|'error', 'return' => array|string].
      */
     public function getAllProducts(): array
     {
@@ -86,8 +86,8 @@ class TrackedProductsModel
     /**
      * Delete a product
      * 
-     * @param int $id Product ID
-     * @return array  Array with status and return
+     * @param int    $id Product ID
+     * @return array     Associative array ['status' => 'success'|'error', 'return' => int|string].
      */
     public function deleteProduct(int $id): array
     {

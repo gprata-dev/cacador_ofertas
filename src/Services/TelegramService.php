@@ -8,10 +8,10 @@ use TelegramClient;
 class TelegramService
 {
     private TrackedProductsModel $trackedProductsModel;
-    private TelegramClient $telegramClient;
-    private string $chatId;
-    private ?int $underEditingId = null;
-    private int $lastUpdateMsgId = 0;
+    private TelegramClient       $telegramClient;
+    private string               $chatId;
+    private ?int                 $underEditingId        = null;
+    private int                  $lastUpdateMsgId       = 0;
 
     public function __construct(TrackedProductsModel $trackedProductsModel, TelegramClient $telegram, array $telConfig)
     {

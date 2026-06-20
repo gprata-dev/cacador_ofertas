@@ -8,7 +8,7 @@ use PDOException;
 class FreeGamesModel
 {
     private string $table = "free_games";
-    private PDO $db;
+    private PDO    $db;
 
     public function __construct(PDO $db)
     {
@@ -16,12 +16,17 @@ class FreeGamesModel
     }
 
     /**
-     * Insert a new game
+     * Inserts a new game or updates an old one if it becomes free again.
+     * Integrates a 24-hour spam shield to block redundant inserts from different scrapers.
      * 
-     * @param string $appId App ID
+     * @param string $appId App ID (Steam ID or Reddit Post ID)
      * @param string $title Game title
-     * @param string $link  Game link
-     * @return array        Array with status and return
+     * @param string $link  Game URL
+     * @return array Associative array ['status' => 'success'|'error', 'return' => int|string].
+     * If success, 'return' holds the affected rows:
+     * 0 = Blocked by the 24h spam shield.
+     * 1 = Brand new game inserted.
+     * 2 = Old game updated (giveaway recurrence).
      */
     public function insertNewGame(string $appId, string $title, string $link): array
     {
@@ -49,6 +54,14 @@ class FreeGamesModel
         }
     }
 
+    /**
+     * Checks if a game was added within the last 24 hours. 
+     * If found, silently updates its created_at timestamp (Heartbeat) to prevent notifying the same giveaway multiple times.
+     * 
+     * @param string $link Game URL
+     * @return array Associative array ['status' => 'success'|'error', 'return' => bool|string].
+     * If success, 'return' is TRUE if found and updated, FALSE if not found.
+     */
     private function checkForRecentlyAddedGames(string $link): array
     {
         $checkQuery = "SELECT id FROM {$this->table} 
