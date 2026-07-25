@@ -3,6 +3,11 @@
 class Database {
     private PDO $pdo;
 
+    /**
+     * Creates a database connection using the provided configuration.
+     * 
+     * @param array $config Database connection settings.
+     */
     public function __construct(array $config)
     {
         try {
@@ -14,7 +19,6 @@ class Database {
             die("Erro de conexão com o banco: " . $e->getMessage());
         }
     }
-
 
     /**
      * @return PDO

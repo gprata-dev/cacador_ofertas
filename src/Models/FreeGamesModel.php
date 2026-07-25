@@ -10,6 +10,11 @@ class FreeGamesModel
     private string $table = "free_games";
     private PDO    $db;
 
+    /**
+     * Initializes the model with a database connection.
+     * 
+     * @param PDO $db Database connection.
+     */
     public function __construct(PDO $db)
     {
         $this->db = $db;
@@ -59,8 +64,8 @@ class FreeGamesModel
      * If found, silently updates its created_at timestamp (Heartbeat) to prevent notifying the same giveaway multiple times.
      * 
      * @param string $link Game URL
-     * @return array Associative array ['status' => 'success'|'error', 'return' => bool|string].
-     * If success, 'return' is TRUE if found and updated, FALSE if not found.
+     * @return array       Associative array ['status' => 'success'|'error', 'return' => bool|string].
+     *                     If success, 'return' is TRUE if found and updated, FALSE if not found.
      */
     private function checkForRecentlyAddedGames(string $link): array
     {
