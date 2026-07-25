@@ -10,20 +10,45 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql 
 
-  bot:
+  instant_bot:
     build: .
+    container_name: cacador_telegram
     restart: always
+    volumes:
+      - .:/app
+    command: php /app/daemons/instant-daemon.php
     depends_on:
       - db
 
-  selenium:
-    image: selenium/standalone-chrome:latest
-    container_name: bot_chrome
+  fastest_bot:
+    build: .
+    container_name: cacador_steam
     restart: always
-    deploy:
-      resources:
-        limits:
-          memory: 500M
+    volumes:
+      - .:/app
+    command: php /app/daemons/fastest-daemon.php
+    depends_on:
+      - db
+
+  fast_bot:
+    build: .
+    container_name: cacador_reddit
+    restart: always
+    volumes:
+      - .:/app
+    command: php /app/daemons/fast-daemon.php
+    depends_on:
+      - db
+
+  # slow_bot:
+  #   build: .
+  #   container_name: cacador_lojas
+  #   restart: always
+  #   volumes:
+  #     - .:/app
+  #   command: php /app/daemons/slow-daemon.php
+  #   depends_on:
+  #     - db
 
 volumes:
   mysql_data:
