@@ -13,6 +13,13 @@ class TelegramService
     private ?int                 $underEditingId        = null;
     private int                  $lastUpdateMsgId       = 0;
 
+    /**
+     * Initializes the Telegram command handling service.
+     * 
+     * @param TrackedProductsModel $trackedProductsModel Model for tracked products.
+     * @param TelegramClient       $telegram             Telegram API client.
+     * @param array                $telConfig            Telegram bot settings.
+     */
     public function __construct(TrackedProductsModel $trackedProductsModel, TelegramClient $telegram, array $telConfig)
     {
         $this->trackedProductsModel = $trackedProductsModel;
@@ -146,7 +153,7 @@ class TelegramService
                             $name        = htmlspecialchars($prod['product_name']);
 
                             $msgList    .= "🔹 <b>ID: {$prod['id']}</b> - {$name}\n";
-                            $msgList    .= "🎯 Alvo: {$targetPrice} | 💰 Atual: {$actualPrice}\n";
+                            $msgList    .= "Alvo: {$targetPrice} | Atual: {$actualPrice}\n";
                             $msgList    .= "✍️ /editar_{$prod['id']} | ❌ /deletar_{$prod['id']}\n\n";
                         }
                         $telReturn = $this->telegramClient->sendMessage($msgList);

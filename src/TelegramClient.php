@@ -5,6 +5,11 @@ class TelegramClient
     private string $token;
     private string $chatId;
 
+    /**
+     * Initializes the Telegram client with the bot configuration.
+     * 
+     * @param array $config Telegram bot settings.
+     */
     public function __construct(array $config)
     {
         $this->token  = $config['token'];
@@ -48,8 +53,8 @@ class TelegramClient
     /**
      * Search for new messages sent to the bot
      * 
-     * @param int $offset Last processed message ID
-     * @return array      Array of new messages sent to the bot
+     * @param int    $offset Last processed message ID
+     * @return array         Array of new messages sent to the bot
      */
     public function getUpdates(int $offset = 0): array
     {

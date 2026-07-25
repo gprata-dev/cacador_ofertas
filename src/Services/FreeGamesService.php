@@ -10,6 +10,12 @@ class FreeGamesService
     private FreeGamesModel $freeGamesModel;
     private TelegramClient $telegram;
 
+    /**
+     * Initializes the free games notification service.
+     * 
+     * @param FreeGamesModel $freeGamesModel Model for free games.
+     * @param TelegramClient $telegram       Telegram API client.
+     */
     public function __construct(FreeGamesModel $freeGamesModel, TelegramClient $telegram)
     {
         $this->freeGamesModel = $freeGamesModel;
