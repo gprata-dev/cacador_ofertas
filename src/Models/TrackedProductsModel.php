@@ -10,6 +10,11 @@ class TrackedProductsModel
     private string $table = 'tracked_products';
     private PDO    $db;
 
+    /**
+     * Initializes the model with a database connection.
+     * 
+     * @param PDO $db Database connection.
+     */
     public function __construct(PDO $db)
     {
         $this->db = $db;
@@ -70,7 +75,7 @@ class TrackedProductsModel
      */
     public function getAllProducts(): array
     {
-        $query = "SELECT id, product_name, target_price, last_price 
+        $query = "SELECT id, product_name, url, target_price, last_price 
                     FROM {$this->table} 
                     ORDER BY id DESC";
         try {
@@ -101,6 +106,32 @@ class TrackedProductsModel
             return ['status' => 'success', 'return' => $stmt->rowCount()];
         } catch (PDOException $e) {
             return ['status' => 'error', 'return' => 'deleteProduct ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Updates the name and last scraped price of a tracked product.
+     * 
+     * @param int    $id          Product ID.
+     * @param string $productName Scraped product name.
+     * @param float  $lastPrice   Scraped product price.
+     * @return array              Associative array ['status' => 'success'|'error', 'return' => int|string].
+     */
+    public function updateScrapedData(int $id, string $productName, float $lastPrice)
+    {
+        $query = "UPDATE {$this->table} 
+                    SET product_name = :name, last_price = :price 
+                    WHERE id = :id";
+        try {
+            $stmt = $this->db->prepare($query);
+            $stmt->bindValue(':name', $productName);
+            $stmt->bindValue(':price', $lastPrice);
+            $stmt->bindValue(':id', $id);
+            $stmt->execute();
+            
+            return ['status' => 'success', 'return' => 1];
+        } catch (PDOException $e) {
+            return ['status' => 'error', 'return' => 'updateScrapedData ' . $e->getMessage()];
         }
     }
 }
