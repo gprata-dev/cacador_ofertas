@@ -30,9 +30,7 @@ class FreeGamesService
      */
     public function insertSteamGame(array $games): void
     {
-        if(empty($games)) {
-            return;
-        }
+        if(empty($games)) return;
 
         foreach ($games as $game) {
             $appId  = $game['app_id'];
@@ -44,9 +42,8 @@ class FreeGamesService
                 $dbError  = "[ERRO BANCO] " . $res['return'] . "\n";
                 echo $dbError;                
                 $errorTelReturn = $this->telegram->sendMessage($dbError);
-                if ($errorTelReturn['status'] === 'error') {
-                    echo "[FALHA TELEGRAM] " . $errorTelReturn['return'] . "\n";
-                }
+                if ($errorTelReturn['status'] === 'error') echo "[FALHA TELEGRAM] " . $errorTelReturn['return'] . "\n";
+                continue;
             }
 
             if($res['return'] > 0) {
@@ -56,9 +53,7 @@ class FreeGamesService
                 $telText  .= "👉<a href='{$link}'>{$link}</a>";
 
                 $telReturn = $this->telegram->sendMessage($telText);
-                if ($telReturn['status'] === 'error') {
-                    echo "[FALHA TELEGRAM] " . $telReturn['return'] . "\n";
-                }
+                if ($telReturn['status'] === 'error') echo "[FALHA TELEGRAM] " . $telReturn['return'] . "\n";
             }
         }
     }
@@ -71,9 +66,7 @@ class FreeGamesService
      */
     public function insertRedditGame(array $games): void
     {
-        if(empty($games)) {
-            return;
-        }
+        if(empty($games)) return;
         
         foreach ($games as $game) {
             $appId  = $game['app_id'];
@@ -85,9 +78,8 @@ class FreeGamesService
                 $dbError  = "[ERRO BANCO] " . $res['return'] . "\n";
                 echo $dbError;                
                 $errorTelReturn = $this->telegram->sendMessage($dbError);
-                if ($errorTelReturn['status'] === 'error') {
-                    echo "[FALHA TELEGRAM] " . $errorTelReturn['return'] . "\n";
-                }
+                if ($errorTelReturn['status'] === 'error') echo "[FALHA TELEGRAM] " . $errorTelReturn['return'] . "\n";
+                continue;
             }
 
             if ($res['return'] > 0) {
@@ -98,9 +90,7 @@ class FreeGamesService
                 $telText  .= "<a href='https://www.reddit.com/r/FreeGameFindings/comments/{$game['app_id']}/'>https://www.reddit.com/r/FreeGameFindings/comments/{$game['app_id']}/</a>";
 
                 $telReturn = $this->telegram->sendMessage($telText);
-                if ($telReturn['status'] === 'error') {
-                    echo "[FALHA TELEGRAM] " . $telReturn['return'] . "\n";
-                }
+                if ($telReturn['status'] === 'error') echo "[FALHA TELEGRAM] " . $telReturn['return'] . "\n";
             }
         }
     }
