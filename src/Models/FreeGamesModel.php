@@ -35,17 +35,13 @@ class FreeGamesModel
      */
     public function insertNewGame(string $appId, string $title, string $link): array
     {
-        $resCheck = $this->checkForRecentlyAddedGames($link);
-        if ($resCheck['status'] === 'error') {
-            return $resCheck;
-        }
-        if ($resCheck['return'] === true) {
-            return ['status' => 'success', 'return' => 0];
-        }
+        $resCheck = $this->checkForRecentlyAddedGames($appId, $link);
+        if ($resCheck['status'] === 'error') return $resCheck;
+        if ($resCheck['return'] === true)    return ['status' => 'success', 'return' => 0];
 
         $query = "INSERT INTO {$this->table} (app_id, title, link)
                     VALUES (:app_id, :title, :link) 
-                    ON DUPLICATE KEY UPDATE created_at = NOW()";
+                    ON DUPLICATE KEY UPDATE created_at = NOW(), link = :link";
         try {
             $stmt = $this->db->prepare($query);
             $stmt->bindValue(':app_id', $appId, PDO::PARAM_STR);
@@ -60,29 +56,32 @@ class FreeGamesModel
     }
 
     /**
-     * Checks if a game was added within the last 24 hours. 
+     * Checks if a game was seen within the last 24 hours by ID or shared link.
      * If found, silently updates its created_at timestamp (Heartbeat) to prevent notifying the same giveaway multiple times.
      * 
+     * @param string $appId Steam app ID or Reddit post ID
      * @param string $link Game URL
      * @return array       Associative array ['status' => 'success'|'error', 'return' => bool|string].
      *                     If success, 'return' is TRUE if found and updated, FALSE if not found.
      */
-    private function checkForRecentlyAddedGames(string $link): array
+    private function checkForRecentlyAddedGames(string $appId, string $link): array
     {
         $checkQuery = "SELECT id FROM {$this->table} 
-                        WHERE link = :link 
+                        WHERE (app_id = :app_id OR link = :link)
                         AND created_at >= NOW() - INTERVAL 1 DAY 
                         LIMIT 1";
         try {
             $checkStmt = $this->db->prepare($checkQuery);
+            $checkStmt->bindValue(':app_id', $appId, PDO::PARAM_STR);
             $checkStmt->bindValue(':link', $link, PDO::PARAM_STR);
             $checkStmt->execute();
 
             if($checkStmt->fetch()) {
                 $updateQuery = "UPDATE {$this->table} 
                                 SET created_at = NOW() 
-                                WHERE link = :link";
+                                WHERE (app_id = :app_id OR link = :link)";
                 $updateStmt = $this->db->prepare($updateQuery);
+                $updateStmt->bindValue(':app_id', $appId, PDO::PARAM_STR);
                 $updateStmt->bindValue(':link', $link, PDO::PARAM_STR);
                 $updateStmt->execute();
 
